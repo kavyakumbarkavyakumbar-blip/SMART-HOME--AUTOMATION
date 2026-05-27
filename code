@@ -1,0 +1,50 @@
+
+#include <reg51.h>
+
+sbit RELAY = P2^0;     
+char data;
+
+void UART_Init()
+{
+    TMOD = 0x20;       
+    TH1  = 0xFD;      
+    SCON = 0x50;        
+    TR1  = 1;           
+}
+
+char UART_Receive()
+{
+    while(RI == 0);    
+    RI = 0;
+    return SBUF;       
+
+void UART_Transmit(char value)
+{
+    SBUF = value;
+    while(TI == 0);     
+    TI = 0;
+}
+
+void main()
+{
+    UART_Init();
+
+    RELAY = 0;          
+
+    while(1)
+    {
+        data = UART_Receive();
+
+        if(data == '1')
+        {
+            RELAY = 1;     
+            UART_Transmit('O');  
+        }
+
+        else if(data == '0')
+        {
+            RELAY = 0;      
+            UART_Transmit('F');   
+        }
+    }
+}
